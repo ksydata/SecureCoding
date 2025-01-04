@@ -16,16 +16,18 @@ class XSSPrevention:
     def __init__(self):
         self.input_value = None
     
-    def validateInput(self):
-        """입력값 검증(필터링) -> 악성 스크립트 삽입 방지"""
-        # 특정 패턴을 정규표현식으로 검증하는 방식
-        pass
+    def validateInput(self, input_value: Any) -> int:
+        """입력값 필터링 -> 악성 스크립트("<scripts>") 삽입 방지"""
+        # 특정 패턴(알파벳, 숫자, 밑줄 허용)을 정규표현식으로 검증하는 화이트리스트 방식
+        if not re.match("^[a-zA-Z0-9_]+$", input_value):
+            raise ValueError("This input value is invalid")
+        return input_value
 
     def escapeHTMLOutput(self, input_value: str) -> str:
         """HTML 출력값에서 특수문자를 HTML 엔티티로 변환하여 인코딩 -> 입력값 무효화"""
         # <, >와 같이 스크립트에 쓰이는 특수문자가 입력되면 스크립트로 동작하여 공격 가능
         stringInput: List = ["<", ">", "'", '"', "(", ")"]
-        htmlEntity: List = ["&lt;", "&gt;", "&quot;", "&#x27;", "$#40;", "&#41;"]
+        htmlEntity: List = ["&lt;", "&gt;", "&quot;", "&#x27;", "&#40;", "&#41;"]
 
         # html.escape() 메서드(Python 내장함수)로 &, <, >, "를 기본적인 HTML 엔티티 처리
         encoded_value = html.escape(input_value)
@@ -36,6 +38,15 @@ class XSSPrevention:
 
         return encoded_value
         
-    def escapeJSOutput(self): 
+    def escapeJSOutput(self, input_value: str) -> str: 
         """JavaScript 출력값에서 특수문자를 이스케이프 처리하여 인코딩 -> 입력값 무효화"""
-        pass
+        # 자바스크립트에서 사용할 수 없는 특수문자
+        stringInput: List = ["\\", "'", '"', "<", ">", "&"]
+        javascriptEscape: List = ["\\\\", "\\'", '\\"', "\\x3C", "\\x3E", "\\x26"]
+
+        # 이스케이프 처리
+        for char, escape in zip(stringInput, javascriptEscape):
+            encoded_value = input_value.replace(char, escape)
+
+        return encoded_value
+            
