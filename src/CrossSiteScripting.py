@@ -7,6 +7,7 @@
 # 실제 운영 중인 서버에 테스트 또는 공격을 하는 행위는 법적인 책임이 따르므로 
 # 개인용 테스트 서버 구축 또는 bWAPP, DVWA, WebGoat 등과 같은 웹취약점 테스트환경 구축을 통해 테스트
 # @SKshieldus, XSS공격유형부터 보안대책까지, 2022.10, https://www.skshieldus.com/blog-security/security-trend-idx-06
+# @SKshieldus, https://github.com/EQSTLab/CVE-2024-46538
 
 import re
 import html
@@ -19,6 +20,7 @@ class XSSPrevention:
     def validateInput(self, input_value: Any) -> int:
         """입력값 필터링 -> 악성 스크립트("<scripts>") 삽입 방지"""
         # 특정 패턴(알파벳, 숫자, 밑줄 허용)을 정규표현식으로 검증하는 화이트리스트 방식
+        # 이메일은 ^[\w\.-]+@[\w\.-]+\.\w+$
         if not re.match("^[a-zA-Z0-9_]+$", input_value):
             raise ValueError("This input value is invalid")
         return input_value
@@ -49,4 +51,15 @@ class XSSPrevention:
             encoded_value = input_value.replace(char, escape)
 
         return encoded_value
-            
+
+    def DOMPurify(self):
+        """javacript
+        element.innerHTML = userInput;
+        element.textContext = userInput;
+
+        var clean = DOMPurify.sanitize(userInput);
+        element.innerHTML = clean;
+        
+        Content-Security-Policy: script-src 'self'
+        """
+        pass
